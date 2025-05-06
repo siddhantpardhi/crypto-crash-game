@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>My Wallet</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px auto;
+      max-width: 500px;
+      text-align: center;
+    }
+    .wallet-info {
+      margin-top: 20px;
+      text-align: left;
+    }
+    .wallet-info h2 {
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>🪙 My Wallet</h1>
+
+  <div id="walletInfo" class="wallet-info" style="display:none;">
+    <p><strong>USD:</strong> $<span id="usdBalance">0</span></p>
+    <p><strong>Bitcoin (BTC):</strong> <span id="btcBalance">0</span></p>
+    <p><strong>Ethereum (ETH):</strong> <span id="ethBalance">0</span></p>
+  </div>
+
+  <script>
+    async function fetchWallet() {
+      try {
+        const res = await fetch('http://localhost:3000/api/wallet/show', {
+          method: 'GET',
+          credentials: 'include' // important if using cookies or sessions
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          alert(data.message || 'Failed to fetch wallet');
+          return;
+        }
+
+        const wallet = data.wallet || {};
+        document.getElementById('usdBalance').textContent = wallet.usd || 0;
+        document.getElementById('btcBalance').textContent = wallet.crypto?.bitcoin || 0;
+        document.getElementById('ethBalance').textContent = wallet.crypto?.ethereum || 0;
+        document.getElementById('walletInfo').style.display = 'block';
+
+      } catch (err) {
+        console.error(err);
+        alert('Error fetching wallet');
+      }
+    }
+
+    // Fetch wallet on page load
+    window.onload = fetchWallet;
+  </script>
+</body>
+</html>
