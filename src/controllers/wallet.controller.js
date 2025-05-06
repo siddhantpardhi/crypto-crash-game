@@ -9,7 +9,7 @@ export const getWallet = async (req, res) => {
       return res.status(400).json({ message: 'Invalid player ID' });
     }
 
-    console.log("🚀 ~ getWal ~ playerId:", playerId)
+    // console.log("🚀 ~ getWal ~ playerId:", playerId)
     
     const player = await Player.findById(playerId).select("wallet")
     if (!player) return res.status(404).json({ message: 'Player not found' });

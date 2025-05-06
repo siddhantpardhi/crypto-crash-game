@@ -21,7 +21,7 @@ export const getCryptoPrice = async (symbol) => {
         }
       }
     );
-    console.log("🚀 ~ getCryptoPrice ~ response:", response.data)
+    // console.log("🚀 ~ getCryptoPrice ~ response:", response.data)
 
     const price = response.data[symbol.toLowerCase()].usd;
     cache[symbol] = price;

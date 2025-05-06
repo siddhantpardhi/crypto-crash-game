@@ -84,7 +84,7 @@
 
     socket.on('roundStart', ({ roundId, crashPoint }) => {
       console.log("🟢 Round Start");
-      statusEl.textContent = `🟢 Round Started — Crashes at x${crashPoint}`;
+      statusEl.textContent = `🟢 Round Started`;
       currentRoundId = roundId;
       canCashOut = true;
       cashoutBtn.disabled = false;
@@ -124,7 +124,7 @@
         cryptoType: selectedCrypto,
         roundId: currentRoundId
       };
-      console.log("Selected Crypto: ", JSON.stringify(betData))
+      // console.log("Selected Crypto: ", JSON.stringify(betData))
 
       try {
         const res = await fetch('http://localhost:3000/api/game/bet', {
@@ -133,10 +133,10 @@
           credentials: 'include',
           body: JSON.stringify(betData)
         });
-        console.log("🚀 ~ placeBetBtn.addEventListener ~ res:", res)
+        // console.log("🚀 ~ placeBetBtn.addEventListener ~ res:", res)
 
         const data = await res.json();
-        console.log("🚀 ~ placeBetBtn.addEventListener ~ data:", data)
+        // console.log("🚀 ~ placeBetBtn.addEventListener ~ data:", data)
         if (res.ok) {
           statusEl.textContent = `Bet of $${betAmount} placed on ${selectedCrypto}! Waiting for the round to crash...`;
           placeBetBtn.disabled = true;
@@ -167,7 +167,7 @@
         });
 
         const data = await res.json();
-        console.log("🚀 ~ cashoutBtn.addEventListener ~ data:", data)
+        // console.log("🚀 ~ cashoutBtn.addEventListener ~ data:", data)
         if (res.ok) {
           statusEl.textContent = `✅ Cashed Out at x${data.multiplier}. You won $${(data.multiplier * betAmount).toFixed(2)}`;
           canCashOut = false;

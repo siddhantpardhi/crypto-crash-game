@@ -36,7 +36,7 @@ export const login = async (req, res) => {
         
         const origin = req.get("origin") || ""
         const islocal = origin.includes("localhost")
-        console.log("🚀 ~ login ~ islocal:", islocal)
+        // console.log("🚀 ~ login ~ islocal:", islocal)
       
         const token = jwt.sign(
           { playerId: player._id },

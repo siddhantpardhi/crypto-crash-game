@@ -8,7 +8,7 @@ import { getCurrentRoundId } from '../socket/socket.js';
 export const placeBet = async (req, res) => {
     try {
         const { usdAmount, cryptoType } = req.body;
-        console.log("🚀 ~ placeBet ~ cryptoType:", cryptoType)
+        // console.log("🚀 ~ placeBet ~ cryptoType:", cryptoType)
 
         const playerId = req.playerId
 
@@ -26,9 +26,9 @@ export const placeBet = async (req, res) => {
 
         // Convert USD to crypto
         const price = await getCryptoPrice(cryptoType);
-        console.log("🚀 ~ placeBet ~ price:", price)
+        // console.log("🚀 ~ placeBet ~ price:", price)
         const cryptoAmount = usdAmount / price;
-        console.log("🚀 ~ placeBet ~ cryptoAmount:", cryptoAmount)
+        // console.log("🚀 ~ placeBet ~ cryptoAmount:", cryptoAmount)
 
         // Deduct USD from player wallet and add crypto balance (optional)
 
@@ -52,7 +52,7 @@ export const placeBet = async (req, res) => {
 
         // Add bet to current round (TODO: fetch actual current round later)
         const roundId = getCurrentRoundId();
-        console.log("🚀 ~ placeBet ~ roundId:", roundId)
+        // console.log("🚀 ~ placeBet ~ roundId:", roundId)
 
         if (!roundId) {
             return res.status(400).json({ message: 'No active round available' });
@@ -103,7 +103,7 @@ export const placeBet = async (req, res) => {
 export const cashOut = async (req, res) => {
     try {
         const playerId = req.playerId
-        console.log("🚀 ~ cashOut ~ playerId:", playerId)
+        // console.log("🚀 ~ cashOut ~ playerId:", playerId)
         const roundId = getCurrentRoundId()
 
         if (!roundId) {
@@ -126,7 +126,7 @@ export const cashOut = async (req, res) => {
             return res.status(400).json({ message: 'Invalid multiplier value' });
           }
           
-        console.log("🚀 ~ cashOut ~ multiplier:", multiplier)
+        // console.log("🚀 ~ cashOut ~ multiplier:", multiplier)
         const payoutCrypto = playerBet.amount * multiplier;
 
         // Update player's wallet (add crypto)
