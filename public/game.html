@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crypto Crash Game</title>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 40px;
+    }
+
+    #multiplier {
+      font-size: 48px;
+      color: #28a745;
+      margin: 20px 0;
+    }
+
+    #status {
+      font-size: 18px;
+      margin-bottom: 30px;
+    }
+
+    button {
+      padding: 12px 24px;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    input {
+      padding: 10px;
+      font-size: 18px;
+      margin-bottom: 20px;
+    }
+
+    select {
+      padding: 10px;
+      font-size: 18px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>🚀 Crypto Crash Game</h1>
+
+  <div id="status">Waiting for round to start...</div>
+  <div id="multiplier">x1.00</div>
+
+  <!-- Bet Amount Input -->
+  <input type="number" id="betAmount" placeholder="Enter your bet in USD" />
+
+  <!-- Crypto Type Selector -->
+  <select id="cryptoType">
+    <option value="bitcoin">Bitcoin (BTC)</option>
+    <option value="ethereum">Ethereum (ETH)</option>
+  </select>
+
+  <button id="placeBetBtn" disabled>Place Bet</button>
+  <button id="cashoutBtn" disabled>💸 Cash Out</button>
+  <button id="walletBtn">💸 Show my Wallet</button>
+
+  <script>
+    const socket = io('http://localhost:3000'); // Use your backend server URL
+    const multiplierEl = document.getElementById('multiplier');
+    const statusEl = document.getElementById('status');
+    const cashoutBtn = document.getElementById('cashoutBtn');
+    const betAmountInput = document.getElementById('betAmount');
+    const cryptoTypeSelect = document.getElementById('cryptoType');
+    const placeBetBtn = document.getElementById('placeBetBtn');
+    const walletBtn = document.getElementById('walletBtn');
+
+    let currentRoundId = null;
+    let canCashOut = false;
+    let betAmount = 0;
+    let selectedCrypto = 'bitcoin';
+
+    socket.on('connect', () => {
+      console.log('Connected to crash server!');
+    });
+
+    socket.on('roundStart', ({ roundId, crashPoint }) => {
+      console.log("🟢 Round Start");
+      statusEl.textContent = `🟢 Round Started`;
+      currentRoundId = roundId;
+      canCashOut = true;
+      cashoutBtn.disabled = false;
+      betAmountInput.disabled = false;
+      placeBetBtn.disabled = false;
+    });
+
+    socket.on('multiplier', (value) => {
+      multiplierEl.textContent = `x${value.toFixed(2)}`;
+    });
+
+    socket.on('crash', ({ roundId, crashPoint }) => {
+      console.log(`💥 Round ${roundId} crashed at x${crashPoint}`);
+      statusEl.textContent = `💥 Round Crashed at x${crashPoint}`;
+      canCashOut = false;
+      cashoutBtn.disabled = true;
+      betAmountInput.disabled = true;
+      placeBetBtn.disabled = true;
+    });
+
+    // Update selected crypto type when the user selects a different option
+    cryptoTypeSelect.addEventListener('change', (e) => {
+      selectedCrypto = e.target.value;
+    });
+
+    // Place Bet Event
+    placeBetBtn.addEventListener('click', async () => {
+      betAmount = parseFloat(betAmountInput.value);
+
+      if (isNaN(betAmount) || betAmount <= 0) {
+        alert('Please enter a valid bet amount!');
+        return;
+      }
+
+      const betData = {
+        usdAmount: betAmount,
+        cryptoType: selectedCrypto,
+        roundId: currentRoundId
+      };
+      // console.log("Selected Crypto: ", JSON.stringify(betData))
+
+      try {
+        const res = await fetch('http://localhost:3000/api/game/bet', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(betData)
+        });
+        // console.log("🚀 ~ placeBetBtn.addEventListener ~ res:", res)
+
+        const data = await res.json();
+        // console.log("🚀 ~ placeBetBtn.addEventListener ~ data:", data)
+        if (res.ok) {
+          statusEl.textContent = `Bet of $${betAmount} placed on ${selectedCrypto}! Waiting for the round to crash...`;
+          placeBetBtn.disabled = true;
+          betAmountInput.disabled = true;
+          cryptoTypeSelect.disabled = true;
+        } else {
+          alert(`Bet failed: ${data.message}`);
+        }
+      } catch (err) {
+        console.error('Bet placement error', err);
+      }
+    });
+    // console.log("🚀 ~ placeBetBtn.addEventListener ~ selectedCrypto:", selectedCrypto)
+
+    // Cash Out Event
+    cashoutBtn.addEventListener('click', async () => {
+      if (!canCashOut) return;
+
+      const multiplierCashedOut = multiplierEl.textContent.slice(1)
+      const cashoutData = { roundId: currentRoundId, multiplier: multiplierCashedOut };
+
+      try {
+        const res = await fetch('http://localhost:3000/api/game/cashout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(cashoutData)
+        });
+
+        const data = await res.json();
+        // console.log("🚀 ~ cashoutBtn.addEventListener ~ data:", data)
+        if (res.ok) {
+          statusEl.textContent = `✅ Cashed Out at x${data.multiplier}. You won $${(data.multiplier * betAmount).toFixed(2)}`;
+          canCashOut = false;
+          cashoutBtn.disabled = true;
+        } else {
+          alert(`Cashout failed: ${data.message}`);
+        }
+      } catch (err) {
+        console.error('Cashout error', err);
+      }
+    });
+
+    function goToWallet() {
+      window.location.href = 'wallet.html';
+    }
+
+    walletBtn.addEventListener('click', async () => {
+      goToWallet()
+    })
+  </script>
+</body>
+
+</html>
